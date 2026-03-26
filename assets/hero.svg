@@ -1,0 +1,24 @@
+<svg width="720" height="200" viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ffc6"/>
+      <stop offset="50%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#9b5cff"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="scan" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="rgba(0,255,198,0)"/>
+      <stop offset="50%" stop-color="rgba(0,255,198,0.3)"/>
+      <stop offset="100%" stop-color="rgba(0,255,198,0)"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="200" fill="#06090f" rx="16"/>
+  <rect width="720" height="200" fill="url(#scan)">
+    <animate attributeName="y" from="-200" to="200" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="50%" y="55%" text-anchor="middle" fill="url(#g)" font-family="Share Tech Mono, monospace" font-size="54" filter="url(#glow)">CTF_PLATFORM</text>
+  <text x="50%" y="78%" text-anchor="middle" fill="#6c7a89" font-family="Rajdhani, sans-serif" font-size="18" letter-spacing="4">ATTACK · DEFEND · LEARN</text>
+</svg>
