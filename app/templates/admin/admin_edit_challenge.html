@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Edit Challenge — CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title"><span class="prompt">#</span> edit_challenge</h1>
+    <p class="page-subtitle">Editing: {{ challenge.title }}</p>
+  </div>
+
+  <div style="max-width:680px;">
+    <div class="card">
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+          {{ form.title.label(class="form-label") }}
+          {{ form.title(class="form-control" + (" invalid" if form.title.errors else "")) }}
+          {% for err in form.title.errors %}<div class="form-error">! {{ err }}</div>{% endfor %}
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+          <div class="form-group">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-control") }}
+          </div>
+          <div class="form-group">
+            {{ form.difficulty.label(class="form-label") }}
+            {{ form.difficulty(class="form-control") }}
+          </div>
+          <div class="form-group">
+            {{ form.points.label(class="form-label") }}
+            {{ form.points(class="form-control") }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form.hint_1.label(class="form-label") }}
+          {{ form.hint_1(class="form-control", rows=2) }}
+        </div>
+        <div class="form-group">
+          {{ form.hint_2.label(class="form-label") }}
+          {{ form.hint_2(class="form-control", rows=2) }}
+        </div>
+        <div class="form-group">
+          {{ form.hint_3.label(class="form-label") }}
+          {{ form.hint_3(class="form-control", rows=2) }}
+        </div>
+
+        <div class="form-group">
+          {{ form.description.label(class="form-label") }}
+          {{ form.description(class="form-control", rows=5) }}
+          {% for err in form.description.errors %}<div class="form-error">! {{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.link.label(class="form-label") }}
+          <small style="color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:4px;">
+            Optional: external URL. If this challenge has an image attachment, clicking the image will open this link.
+          </small>
+          {{ form.link(class="form-control" + (" invalid" if form.link.errors else ""), placeholder="https://example.com") }}
+          {% for err in form.link.errors %}<div class="form-error">! {{ err }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.flag.label(class="form-label") }}
+          <small style="color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:4px;">
+            Leave blank to keep the current flag. New flag will be SHA256-hashed.
+          </small>
+          {{ form.flag(class="form-control", placeholder="Leave blank to keep current flag", autocomplete="off") }}
+        </div>
+
+        {% if challenge.file_path %}
+        <div class="form-group">
+          <div class="form-label">Current Attachment</div>
+          {% set filename = challenge.file_path.split('/')[-1] %}
+          {% set file_ext = filename.split('.')[-1].lower() if '.' in filename else '' %}
+          {% if file_ext in ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'] %}
+            <div class="attachment-preview">
+              <img src="{{ url_for('static', filename=challenge.file_path) }}" alt="Current attachment" class="preview-image">
+              <div class="preview-actions">
+                <a href="{{ url_for('static', filename=challenge.file_path) }}" class="btn btn-sm btn-secondary" download="{{ filename }}">
+                  ⬇ Download
+                </a>
+              </div>
+            </div>
+          {% else %}
+            <div class="attachment-preview">
+              <div class="file-preview">
+                <span class="file-icon">📎</span>
+                <span class="file-name">{{ filename }}</span>
+                <a href="{{ url_for('static', filename=challenge.file_path) }}" class="btn btn-sm btn-secondary" download="{{ filename }}">
+                  ⬇ Download
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          {{ form.attachment.label(class="form-label") }}
+          {{ form.attachment(class="form-control") }}
+        </div>
+
+        <div class="d-flex gap-2 mt-2">
+          {{ form.submit(class="btn btn-primary") }}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}My Stats - CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title"><span class="prompt">$</span> cat ./my_stats</h1>
+    <p class="page-subtitle">Your private flag submission accuracy and attempt history summary.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Accuracy</div>
+      <div class="stat-value">{{ stats_summary.accuracy }}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Attempts</div>
+      <div class="stat-value">{{ stats_summary.total_submissions }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Correct</div>
+      <div class="stat-value">{{ stats_summary.correct_submissions }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Wrong</div>
+      <div class="stat-value">{{ stats_summary.wrong_submissions }}</div>
+    </div>
+  </div>
+
+  <div class="card stats-card-detail">
+    <div class="stat-label">Most Attempted Challenge</div>
+    {% if stats_summary.most_targeted %}
+    <div class="stats-highlight">
+      {{ stats_summary.most_targeted.title }}
+      <span class="stats-highlight-meta">{{ stats_summary.most_targeted.attempts }} attempt{{ 's' if stats_summary.most_targeted.attempts != 1 }}</span>
+    </div>
+    {% else %}
+    <div class="empty-state compact-empty">
+      <div>No flag submissions recorded yet.</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card chart-card">
+    <div class="stat-label">Accuracy Trend</div>
+    {% if stats_summary.chart_points %}
+    {% set width = 760 %}
+    {% set height = 260 %}
+    {% set ns = namespace(points='') %}
+    {% for point in stats_summary.chart_points %}
+      {% set x = 30 + ((loop.index0 / ((stats_summary.chart_points|length - 1) if stats_summary.chart_points|length > 1 else 1)) * (width - 60)) %}
+      {% set y = 20 + ((100 - point.accuracy) / 100 * (height - 50)) %}
+      {% set ns.points = ns.points ~ x ~ ',' ~ y ~ ' ' %}
+    {% endfor %}
+    <div class="chart-shell">
+      <svg viewBox="0 0 {{ width }} {{ height }}" class="accuracy-chart" role="img" aria-label="Line chart of your cumulative flag submission accuracy">
+        <line x1="30" y1="{{ height - 30 }}" x2="{{ width - 20 }}" y2="{{ height - 30 }}" class="chart-axis"></line>
+        <line x1="30" y1="20" x2="30" y2="{{ height - 30 }}" class="chart-axis"></line>
+        <line x1="30" y1="20" x2="{{ width - 20 }}" y2="20" class="chart-grid"></line>
+        <line x1="30" y1="{{ 20 + ((height - 50) / 2) }}" x2="{{ width - 20 }}" y2="{{ 20 + ((height - 50) / 2) }}" class="chart-grid"></line>
+        <line x1="30" y1="{{ height - 30 }}" x2="{{ width - 20 }}" y2="{{ height - 30 }}" class="chart-grid"></line>
+        <polyline points="{{ ns.points.strip() }}" class="chart-line"></polyline>
+        {% for point in stats_summary.chart_points %}
+          {% set x = 30 + ((loop.index0 / ((stats_summary.chart_points|length - 1) if stats_summary.chart_points|length > 1 else 1)) * (width - 60)) %}
+          {% set y = 20 + ((100 - point.accuracy) / 100 * (height - 50)) %}
+          <circle cx="{{ x }}" cy="{{ y }}" r="4" class="chart-dot"></circle>
+        {% endfor %}
+        <text x="10" y="24" class="chart-label">100%</text>
+        <text x="14" y="{{ 24 + ((height - 50) / 2) }}" class="chart-label">50%</text>
+        <text x="18" y="{{ height - 26 }}" class="chart-label">0%</text>
+        <text x="30" y="{{ height - 8 }}" class="chart-label">1</text>
+        <text x="{{ width - 42 }}" y="{{ height - 8 }}" class="chart-label">{{ stats_summary.chart_points|length }}</text>
+      </svg>
+    </div>
+    <p class="chart-caption">Cumulative accuracy by submission attempt. The line moves after every flag you submit.</p>
+    {% else %}
+    <div class="empty-state compact-empty">
+      <div>Submit a few flags to generate your accuracy chart.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

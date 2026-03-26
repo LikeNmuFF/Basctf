@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Challenges — CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header d-flex justify-between align-center">
+    <div>
+      <h1 class="page-title"><span class="prompt">$</span> ls ./challenges</h1>
+      <p class="page-subtitle">
+        {{ solved_ids|length }} solved &mdash; {{ visible_count }} shown / {{ total_count }} total
+      </p>
+    </div>
+  </div>
+
+  <form id="challenge-filter-form" class="filter-bar" method="GET">
+    <div class="filter-field">
+      <label for="search-input">Search</label>
+      <input
+        id="search-input"
+        type="text"
+        name="q"
+        value="{{ filters.q }}"
+        placeholder="Search title or description"
+        class="form-control">
+    </div>
+
+    <div class="filter-field">
+      <label for="category-select">Category</label>
+      <select id="category-select" name="category" class="form-control">
+        <option value="all" {% if filters.category == 'all' %}selected{% endif %}>All categories</option>
+        {% for value, label in categories %}
+          <option value="{{ value }}" {% if filters.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="difficulty-select">Difficulty</label>
+      <select id="difficulty-select" name="difficulty" class="form-control">
+        <option value="all" {% if filters.difficulty == 'all' %}selected{% endif %}>All difficulties</option>
+        {% for value, label in difficulties %}
+          <option value="{{ value }}" {% if filters.difficulty == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary btn-sm">Reset</a>
+    </div>
+  </form>
+
+  {% if grouped %}
+    {% for category, challenges in grouped.items() %}
+    <div class="category-section">
+      <div class="category-label">
+        {{ category | upper }}
+        <span style="color:var(--text-muted); font-size:0.7rem;">({{ challenges|length }})</span>
+      </div>
+      <div class="challenge-grid">
+        {% for ch in challenges %}
+        <a href="{{ url_for('challenges.challenge_detail', challenge_id=ch.id) }}"
+           class="challenge-card {% if ch.id in solved_ids %}solved{% endif %}">
+          <div class="ch-title">{{ ch.title }}</div>
+          <div class="ch-desc">{{ ch.description }}</div>
+          <div class="ch-meta">
+            <div class="ch-meta-left">
+              <span class="ch-points">{{ ch.points }} pts</span>
+              <span class="badge-diff badge-{{ ch.difficulty }}">{{ ch.difficulty|capitalize }}</span>
+            </div>
+            {% if ch.id in solved_ids %}
+              <span class="ch-solved-badge">&#10003; SOLVED</span>
+            {% else %}
+              <span class="ch-solves">{{ ch.solve_count }} solve{{ 's' if ch.solve_count != 1 }}</span>
+            {% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">&#9888;</div>
+      <div>No challenges match your filters.</div>
+      <div class="mt-2">
+        <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary btn-sm">Clear filters</a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin.new_challenge') }}" class="btn btn-primary btn-sm">+ Add Challenge</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

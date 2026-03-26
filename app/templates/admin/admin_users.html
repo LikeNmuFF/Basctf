@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin — CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header d-flex justify-between align-center">
+    <div>
+      <h1 class="page-title"><span class="prompt">#</span> manage_users</h1>
+      <p class="page-subtitle">{{ users|length }} registered user{{ 's' if users|length != 1 }}</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
+  </div>
+
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Score</th>
+          <th>Solves</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td class="text-mono" style="color:var(--text-muted);">#{{ user.id }}</td>
+          <td style="font-weight:600;">
+            {{ user.username }}
+            {% if user.id == current_user.id %}
+              <span style="color:var(--text-muted); font-size:0.75rem;">(you)</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--text-dim); font-size:0.85rem;">{{ user.email }}</td>
+          <td class="text-mono {% if user.score < 0 %}score-negative{% endif %}" style="color:{{ 'var(--red)' if user.score < 0 else 'var(--green)' }};">{{ user.score }}</td>
+          <td class="text-mono" style="color:var(--text-dim);">{{ user.solves.count() }}</td>
+          <td>
+            {% if user.is_admin %}
+              <span class="badge" style="color:var(--orange); border-color:rgba(255,140,0,0.4); background:rgba(255,140,0,0.08); font-size:0.68rem;">ADMIN</span>
+            {% else %}
+              <span class="badge" style="color:var(--text-dim); border-color:var(--border); font-size:0.68rem;">PLAYER</span>
+            {% endif %}
+          </td>
+          <td style="color:var(--text-muted); font-size:0.82rem;">
+            {{ user.created_at.strftime('%Y-%m-%d') }}
+          </td>
+          <td>
+            {% if user.id != current_user.id %}
+            <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-warning btn-sm"
+                      data-confirm="Toggle admin status for {{ user.username }}?">
+                {{ 'Revoke Admin' if user.is_admin else 'Make Admin' }}
+              </button>
+            </form>
+            {% else %}
+            <span style="color:var(--text-muted); font-size:0.8rem;">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

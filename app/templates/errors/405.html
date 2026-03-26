@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}405 | CTF Platform{% endblock %}
+
+{% block content %}
+<section class="error-shell">
+  <div class="container">
+    <div class="error-card">
+      <p class="error-code">405</p>
+      <h1 class="error-title">Method Not Allowed</h1>
+      <p class="error-text">
+        <span class="text-mono text-cyan">{{ attempted_method }}</span> is not allowed for this endpoint.
+      </p>
+      {% if allowed_methods %}
+      <p class="error-text error-meta">
+        Allowed methods: {{ allowed_methods | join(', ') }}
+      </p>
+      {% endif %}
+      <div class="error-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Return Home</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary">View Challenges</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

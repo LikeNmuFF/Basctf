@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}{{ challenge.title }} — CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="mb-2">
+    <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary btn-sm">← Back</a>
+  </div>
+
+  <div class="challenge-detail">
+    <div class="detail-header">
+      <h1 class="detail-title">{{ challenge.title }}</h1>
+      <div class="detail-meta">
+        <span class="badge badge-cat">{{ challenge.category | upper }}</span>
+        <span class="badge badge-diff badge-{{ challenge.difficulty }}">{{ challenge.difficulty|capitalize }}</span>
+        <span class="badge badge-pts">{{ challenge.points }} pts</span>
+        {% if already_solved %}
+          <span class="badge badge-solved-y">&#10003; SOLVED</span>
+        {% else %}
+          <span class="badge badge-solved-n">UNSOLVED</span>
+        {% endif %}
+        <span class="badge" style="color:var(--text-dim);border-color:var(--border);">
+          {{ challenge.solve_count }} solve{{ 's' if challenge.solve_count != 1 }}
+        </span>
+      </div>
+      <div class="detail-desc">{{ challenge.description }}</div>
+
+      <div class="hint-section">
+        <h4>Hints (penalty applies)</h4>
+        <p>1st hint: -25 points · 2nd hint: -50 points · 3rd hint: -100 points</p>
+
+        {% set unlocked = hint_usage.used_hints if hint_usage else 0 %}
+        <ul class="hint-list">
+          {% for i in [1,2,3] %}
+            <li>
+              {% if i <= unlocked %}
+                <strong>Hint {{ i }}:</strong>
+                {% if i == 1 %}{{ challenge.hint_1 }}{% elif i == 2 %}{{ challenge.hint_2 }}{% else %}{{ challenge.hint_3 }}{% endif %}
+              {% else %}
+                <form method="POST" action="{{ url_for('challenges.challenge_hint', challenge_id=challenge.id, hint_number=i) }}" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-warning btn-sm">Unlock hint {{ i }} ({{ [25,50,100][i-1] }} pts)</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      {% if challenge.link %}
+      <div class="link-section">
+        <h4>Challenge Link</h4>
+        <div class="link-container">
+          <a href="{{ challenge.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+            🔗 Open Link
+          </a>
+          <span class="link-url">{{ challenge.link }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if challenge.file_path %}
+      <div class="attachment-section">
+        <h4>Challenge Files</h4>
+        {% set filename = challenge.file_path.split('/')[-1] %}
+        {% set file_ext = filename.split('.')[-1].lower() if '.' in filename else '' %}
+        <div class="attachment-file">
+          <div class="file-info">
+            <span class="file-icon">📄</span>
+            <span class="file-name">{{ filename }}</span>
+            <span class="file-type">{{ file_ext.upper() if file_ext else 'FILE' }}</span>
+          </div>
+          {% if challenge.link %}
+          <a href="{{ challenge.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">
+            Open Challenge Link
+          </a>
+          {% endif %}
+          <a href="{{ url_for('static', filename=challenge.file_path) }}" class="btn btn-sm btn-secondary" download="{{ filename }}">
+            ⬇ Download File
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if already_solved %}
+    <div class="solved-notice">
+      ✓ &nbsp; You have already solved this challenge and earned {{ challenge.points }} points.
+    </div>
+    {% else %}
+    <div class="flag-form">
+      <h3>// submit flag</h3>
+      {% if cooldown_remaining > 0 %}
+      <div class="cooldown-notice">
+        Cooldown active. You can submit again in {{ cooldown_remaining }} second{{ 's' if cooldown_remaining != 1 }}.
+      </div>
+      {% endif %}
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="flag-input-row">
+          <input
+            type="text"
+            name="flag"
+            id="flag-input"
+            class="flag-input"
+            placeholder="CTF{your_flag_here}"
+            autocomplete="off"
+            spellcheck="false"
+            required
+            {% if cooldown_remaining > 0 %}disabled{% endif %}>
+          <button type="submit" class="btn btn-primary" {% if cooldown_remaining > 0 %}disabled{% endif %}>Submit</button>
+        </div>
+      </form>
+      <p class="flag-form-hint">
+        After 3 wrong submissions in a row on this challenge, each additional wrong attempt adds a 5 second wait.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

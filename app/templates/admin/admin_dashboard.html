@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header d-flex justify-between align-center">
+    <div>
+      <h1 class="page-title"><span class="prompt">#</span> admin_panel</h1>
+      <p class="page-subtitle">Manage challenges and users</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.users') }}" class="btn btn-secondary btn-sm">Manage Users</a>
+      <a href="{{ url_for('admin.new_challenge') }}" class="btn btn-primary btn-sm">+ New Challenge</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Players</div>
+      <div class="stat-value">{{ total_users }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Challenges</div>
+      <div class="stat-value">{{ total_challenges }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Solves</div>
+      <div class="stat-value">{{ total_solves }}</div>
+    </div>
+  </div>
+
+  <!-- Challenges table -->
+  <div class="card" style="padding:0; overflow:hidden;">
+    <div style="padding:1rem 1.2rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <span class="text-mono" style="color:var(--cyan); font-size:0.8rem; letter-spacing:2px;">CHALLENGES</span>
+    </div>
+    {% if challenges %}
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Difficulty</th>
+          <th>Points</th>
+          <th>Solves</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ch in challenges %}
+        <tr class="{% if not ch.is_active %}inactive-row{% endif %}">
+          <td class="text-mono" style="color:var(--text-muted);">#{{ ch.id }}</td>
+          <td style="font-weight:600;">{{ ch.title }}</td>
+          <td>
+            <span class="badge badge-cat" style="font-size:0.68rem;">{{ ch.category }}</span>
+          </td>
+          <td>
+            <span class="badge badge-diff badge-{{ ch.difficulty }}">{{ ch.difficulty|capitalize }}</span>
+          </td>
+          <td class="text-mono" style="color:var(--yellow);">{{ ch.points }}</td>
+          <td class="text-mono" style="color:var(--text-dim);">{{ ch.solve_count }}</td>
+          <td>
+            {% if ch.is_active %}
+              <span class="active-dot"></span>
+            {% else %}
+              <span class="inactive-dot"></span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="action-btns">
+              <a href="{{ url_for('admin.edit_challenge', challenge_id=ch.id) }}"
+                 class="btn btn-secondary btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin.toggle_challenge', challenge_id=ch.id) }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-warning btn-sm">
+                  {{ 'Deactivate' if ch.is_active else 'Activate' }}
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin.delete_challenge', challenge_id=ch.id) }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm"
+                        data-confirm="Delete '{{ ch.title }}'? This cannot be undone.">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">⚑</div>
+      <div>No challenges yet. <a href="{{ url_for('admin.new_challenge') }}" style="color:var(--cyan);">Create one</a>.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

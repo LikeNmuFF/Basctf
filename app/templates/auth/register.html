@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Register - CTF Platform{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-stage">
+    <img
+      src="{{ url_for('static', filename='logo_animated_dark.svg') }}"
+      alt=""
+      class="auth-bg-logo"
+      aria-hidden="true">
+
+    <div class="auth-box">
+      <div class="auth-logo">
+        <span class="auth-logo-text">[CTF_PLATFORM]</span>
+        <span class="auth-logo-sub">Capture The Flag</span>
+      </div>
+      <p class="auth-title">// create account</p>
+
+      <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+          {{ form.username.label(class="form-label") }}
+          {{ form.username(class="form-control" + (" invalid" if form.username.errors else ""), placeholder="choose_a_handle") }}
+          {% for err in form.username.errors %}
+            <div class="form-error">! {{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.email.label(class="form-label") }}
+          {{ form.email(class="form-control" + (" invalid" if form.email.errors else ""), placeholder="hacker@example.com") }}
+          {% for err in form.email.errors %}
+            <div class="form-error">! {{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.password.label(class="form-label") }}
+          {{ form.password(class="form-control" + (" invalid" if form.password.errors else ""), placeholder="min 6 characters") }}
+          {% for err in form.password.errors %}
+            <div class="form-error">! {{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          {{ form.confirm_password.label(class="form-label") }}
+          {{ form.confirm_password(class="form-control" + (" invalid" if form.confirm_password.errors else ""), placeholder="repeat password") }}
+          {% for err in form.confirm_password.errors %}
+            <div class="form-error">! {{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group mt-2">
+          {{ form.submit(class="btn btn-primary", style="width:100%; justify-content:center;") }}
+        </div>
+      </form>
+
+      <div class="form-divider">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Scoreboard — CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title"><span class="prompt">$</span> cat ./scoreboard.txt</h1>
+    <p class="page-subtitle">{{ players|length }} registered player{{ 's' if players|length != 1 }}</p>
+  </div>
+
+  {% if players %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="scoreboard-table">
+      <thead>
+        <tr>
+          <th style="width:60px;">#</th>
+          <th>Player</th>
+          <th>Score</th>
+          <th>Solves</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in players %}
+        <tr class="{% if player.id == current_user.id %}current-user{% endif %}">
+          <td class="rank-cell {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
+            {% if loop.index == 1 %}🥇
+            {% elif loop.index == 2 %}🥈
+            {% elif loop.index == 3 %}🥉
+            {% else %}{{ loop.index }}{% endif %}
+          </td>
+          <td class="user-cell">{{ player.username }}</td>
+          <td class="score-cell">{{ player.score }}</td>
+          <td class="text-mono" style="color:var(--text-dim);">{{ player.solves.count() }}</td>
+          <td style="color:var(--text-muted); font-size:0.82rem;">
+            {{ player.created_at.strftime('%Y-%m-%d') }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🏆</div>
+    <div>No players on the board yet. Be the first to solve a challenge!</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
