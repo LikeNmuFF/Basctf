@@ -28,7 +28,7 @@ def list_challenges():
     total_count = len(get_all_active_challenges())
     solved_ids = get_solved_ids_for_user(current_user.id)
     return render_template(
-        'challenges/challenges.html',
+        'challenges.html',
         grouped=grouped,
         solved_ids=solved_ids,
         filters={

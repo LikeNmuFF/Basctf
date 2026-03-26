@@ -1,180 +1,107 @@
-# CTF Platform
+<p align="center">
+  <svg width="720" height="200" viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#00ffc6"/>
+        <stop offset="50%" stop-color="#00d4ff"/>
+        <stop offset="100%" stop-color="#9b5cff"/>
+      </linearGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <linearGradient id="scan" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="rgba(0,255,198,0)"/>
+        <stop offset="50%" stop-color="rgba(0,255,198,0.3)"/>
+        <stop offset="100%" stop-color="rgba(0,255,198,0)"/>
+      </linearGradient>
+    </defs>
+    <rect width="720" height="200" fill="#06090f" rx="16"/>
+    <rect width="720" height="200" fill="url(#scan)">
+      <animate attributeName="y" from="-200" to="200" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <text x="50%" y="55%" text-anchor="middle" fill="url(#g)" font-family="Share Tech Mono, monospace" font-size="54" filter="url(#glow)">CTF_PLATFORM</text>
+    <text x="50%" y="78%" text-anchor="middle" fill="#6c7a89" font-family="Rajdhani, sans-serif" font-size="18" letter-spacing="4">ATTACK  ·  DEFEND  ·  LEARN</text>
+  </svg>
+</p>
 
-A production-ready Capture The Flag web platform built with Flask, SQLAlchemy, and MySQL.
+> A kinetic Capture The Flag range built with Flask + SQLAlchemy + MySQL. Pairs nicely with synthwave and a dark terminal.
 
 ---
 
-## Features
+## 🔥 Highlights
 
-- User registration / login / logout (Flask-Login)
-- Challenge browser grouped by category
-- Secure flag submission (SHA256-hashed, no plain-text storage)
-- Duplicate-solve prevention
-- Live scoreboard ranked by score
-- Admin panel: create / edit / toggle / delete challenges
-- File attachment uploads per challenge
-- Admin user management (grant/revoke admin)
+- Challenge browser with live filtering by **category + difficulty + search** (PicoCTF vibes).
+- Secure flag flow: SHA256 hashing + cooldowns + duplicate-solve guard.
+- Rich admin console: create/edit/toggle/delete challenges, upload files, manage users.
+- Built‑in hints with point penalties and personal accuracy stats.
+- Neon UI (Rajdhani + Share Tech Mono) ready for dark dashboards.
 
 ---
 
-## Project Structure
+## 🗂️ Stack & Layout
 
 ```
 ctf_platform/
-├── app/
-│   ├── __init__.py          # App factory
-│   ├── extensions.py        # db, login_manager
-│   ├── models.py            # User, Challenge, Solve
-│   ├── utils.py             # hash_flag, verify_flag, file helpers
-│   ├── auth/
-│   │   ├── __init__.py
-│   │   ├── routes.py
-│   │   └── forms.py
-│   ├── challenges/
-│   │   ├── __init__.py
-│   │   ├── routes.py
-│   │   └── services.py
-│   ├── scoreboard/
-│   │   ├── __init__.py
-│   │   └── routes.py
-│   ├── admin/
-│   │   ├── __init__.py
-│   │   ├── routes.py
-│   │   └── forms.py
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── auth/
-│   │   ├── challenges/
-│   │   ├── scoreboard/
-│   │   └── admin/
-│   └── static/
-│       ├── css/main.css
-│       ├── js/main.js
-│       └── uploads/
-├── config.py
-├── run.py
-├── seed.py
-├── requirements.txt
-└── .env.example
+├─ app/
+│  ├─ __init__.py          # App factory + DB bootstraps (auto adds new cols)
+│  ├─ extensions.py        # db, login_manager, csrf
+│  ├─ models.py            # User, Challenge (now with difficulty), Solve, etc.
+│  ├─ utils.py             # flag hashing, uploads, categories, difficulties
+│  ├─ auth/                # auth routes/forms
+│  ├─ challenges/          # player routes/services (filters, hints, cooldowns)
+│  ├─ scoreboard/          # leaderboard
+│  ├─ admin/               # admin routes/forms/templates
+│  ├─ templates/           # Jinja views (dark UI)
+│  └─ static/              # css/js/assets/uploads
+├─ config.py               # env profiles
+├─ seed.py                 # bootstrap admin + sample challenges
+├─ run.py                  # flask entry
+└─ requirements.txt
 ```
 
 ---
 
-## Setup & Installation
-
-### 1. Prerequisites
-
-- Python 3.10+
-- MySQL server running locally (or remote)
-
-### 2. Clone / unzip the project
-
-```bash
-cd ctf_platform
-```
-
-### 3. Create a virtual environment
+## 🚀 Quickstart
 
 ```bash
 python -m venv venv
-source venv/bin/activate        # Linux/macOS
-venv\Scripts\activate           # Windows
-```
-
-### 4. Install dependencies
-
-```bash
+source venv/bin/activate      # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
+
+mysql -u root -p -e "CREATE DATABASE ctf_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+cp .env.example .env          # set DATABASE_URL + SECRET_KEY
+python seed.py                # creates admin/admin1234 + sample challenges
+python run.py                 # visit http://localhost:5000
 ```
 
-### 5. Create the MySQL database
-
-```sql
-CREATE DATABASE ctf_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 6. Configure environment
-
-```bash
-cp .env.example .env
-# Edit .env and set your DATABASE_URL and SECRET_KEY
-```
-
-Example `.env`:
-```
-FLASK_ENV=development
-SECRET_KEY=your-super-secret-random-string
-DATABASE_URL=mysql+pymysql://root:yourpassword@localhost/ctf_platform
-```
-
-### 7. Create tables & seed data
-
-```bash
-python seed.py
-```
-
-This creates:
-- Admin account: `admin` / `admin1234`
-- 4 sample challenges with flags printed to terminal
-
-### 8. Run the application
-
-```bash
-python run.py
-```
-
-Visit: **http://localhost:5000**
+Admin flow: log in → **Admin** tab → build challenges (category, difficulty, points, hints, attachment).  
+Player flow: register → filter by vibe (web/crypto/pwn…) & difficulty → solve → climb the scoreboard.
 
 ---
 
-## Usage
+## 🛡️ Security Posture
 
-### Admin
-1. Log in as `admin` / `admin1234`
-2. Navigate to **Admin** in the navbar
-3. Create challenges, manage users
-
-### Players
-1. Register an account
-2. Browse challenges
-3. Submit flags in the format shown (e.g., `CTF{...}`)
-4. Check your rank on the Scoreboard
+| Layer         | Mechanism                                                        |
+| ------------- | ---------------------------------------------------------------- |
+| Passwords     | PBKDF2-SHA256 (`generate_password_hash`)                         |
+| Flags         | SHA256 digest only; constant-time compare                        |
+| Abuse control | Duplicate-solve constraint; cooldown after streak of wrong flags |
+| CSRF          | Flask-WTF tokens everywhere                                      |
+| Uploads       | Extension allowlist + `secure_filename`                          |
+| Admin         | `@admin_required` 403 gate                                       |
 
 ---
 
-## Security Notes
+## 🧰 Operational Notes
 
-| What | How |
-|---|---|
-| Passwords | Werkzeug `generate_password_hash` (PBKDF2-SHA256) |
-| Flags | SHA256 hex digest — plain flags are **never** stored |
-| Duplicate solves | Unique DB constraint on `(user_id, challenge_id)` |
-| CSRF | Flask-WTF tokens on all forms |
-| File uploads | Extension allowlist + `secure_filename` |
-| Admin routes | `@admin_required` decorator, returns 403 for non-admins |
+- Difficulty column auto-migrates on start; seed script tags samples with easy/medium.
+- Run `python seed.py` again if you want fresh demo data after schema tweaks.
+- For production: use gunicorn/uwsgi behind nginx, rotate SECRET_KEY, harden MySQL creds.
 
 ---
 
-## Changing the Default Admin Password
+### Hack the planet 🛰️
 
-Log in as admin, or update directly:
-
-```python
-# In a Flask shell: flask shell
-from app.models import User
-from app.extensions import db
-u = User.query.filter_by(username='admin').first()
-u.set_password('new_secure_password')
-db.session.commit()
-```
-
----
-
-## Production Deployment Checklist
-
-- [ ] Set `FLASK_ENV=production` in `.env`
-- [ ] Change `SECRET_KEY` to a random 32+ byte string
-- [ ] Change admin password immediately after first login
-- [ ] Use a WSGI server: `gunicorn run:app`
-- [ ] Put behind a reverse proxy (nginx) with HTTPS
-- [ ] Set `SQLALCHEMY_POOL_RECYCLE` for long-running MySQL connections
+Spin it up, drop in your own challenges, and let the neon scoreboard glow. PRs welcome.\*\*\* End Patch Jiova
