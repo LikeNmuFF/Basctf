@@ -17,6 +17,7 @@
 ---
 
 ## Highlights
+
 - Challenge browser with live filtering by **category + difficulty + search** (PicoCTF vibes).
 - Secure flag flow: SHA256 hashing + cooldowns + duplicate-solve guard.
 - Rich admin console: create/edit/toggle/delete challenges, upload files, manage users.
@@ -26,6 +27,7 @@
 ---
 
 ## Stack & Layout
+
 ```
 ctf_platform/
 ├─ app/
@@ -48,6 +50,7 @@ ctf_platform/
 ---
 
 ## Quickstart
+
 ```bash
 python -m venv venv
 source venv/bin/activate      # or venv\Scripts\activate on Windows
@@ -66,6 +69,7 @@ Player flow: register → filter by vibe (web/crypto/pwn…) & difficulty → so
 ---
 
 ## Security Posture
+
 | Layer         | Mechanism                                                        |
 | ------------- | ---------------------------------------------------------------- |
 | Passwords     | PBKDF2-SHA256 (`generate_password_hash`)                         |
@@ -78,6 +82,7 @@ Player flow: register → filter by vibe (web/crypto/pwn…) & difficulty → so
 ---
 
 ## Operational Notes
+
 - Difficulty column auto-migrates on start; seed script tags samples with easy/medium.
 - Run `python seed.py` again if you want fresh demo data after schema tweaks.
 - For production: use gunicorn/uwsgi behind nginx, rotate SECRET_KEY, harden MySQL creds.
@@ -85,6 +90,7 @@ Player flow: register → filter by vibe (web/crypto/pwn…) & difficulty → so
 ---
 
 ## Render Deployment
+
 - This repo now includes `render.yaml` for a free Render web service.
 - The app defaults to `production` config when `APP_ENV`/`FLASK_ENV` is not set.
 - `DATABASE_URL` can use Aiven's raw `mysql://...` format; the app converts it to `mysql+pymysql://...`.
@@ -105,10 +111,12 @@ ADMIN_PASSWORD=<strong-password>
 ```
 
 Notes:
+
 - Keep `ca.pem` in the repo root, or set `MYSQL_SSL_CA` to the certificate path if you move it.
 - Render free instances have ephemeral disk, so uploaded challenge files stored on local disk are not durable across redeploys/restarts.
 
 ---
 
 ### Hack the planet
+
 Spin it up, drop in your own challenges, and let the neon scoreboard glow. PRs welcome.
