@@ -3,6 +3,7 @@ import hashlib
 import os
 from uuid import uuid4
 from urllib.parse import urlparse
+
 from werkzeug.utils import secure_filename
 from flask import current_app
 
@@ -50,6 +51,8 @@ def normalize_external_link(link: str | None) -> str | None:
 
     parsed = urlparse(cleaned)
     if parsed.scheme:
+        if parsed.scheme not in {'http', 'https'}:
+            return None
         return cleaned
 
     return f'https://{cleaned}'

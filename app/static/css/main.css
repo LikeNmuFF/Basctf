@@ -301,6 +301,16 @@ body::before {
   font-size: 0.95rem;
   white-space: pre-wrap;
 }
+.detail-desc a {
+  color: #a8e4ff;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(168, 228, 255, 0.4);
+  transition: color var(--transition), border-color var(--transition);
+}
+.detail-desc a:hover {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
 
 .flag-form {
   background: var(--bg-card);

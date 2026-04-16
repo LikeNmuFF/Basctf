@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: ctf-platform
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT run:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: MYSQL_SSL_CA
+        value: /opt/render/project/src/ca.pem
+      - key: LOG_LEVEL
+        value: INFO
+      - key: VERIFY_DB_ON_START
+        value: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

@@ -84,5 +84,31 @@ Player flow: register → filter by vibe (web/crypto/pwn…) & difficulty → so
 
 ---
 
+## Render Deployment
+- This repo now includes `render.yaml` for a free Render web service.
+- The app defaults to `production` config when `APP_ENV`/`FLASK_ENV` is not set.
+- `DATABASE_URL` can use Aiven's raw `mysql://...` format; the app converts it to `mysql+pymysql://...`.
+- If `DATABASE_URL` includes `ssl-mode=REQUIRED`, the app automatically uses `ca.pem` for TLS verification when available.
+- Render sets `MYSQL_SSL_CA` to `/opt/render/project/src/ca.pem` so the included certificate file is used at runtime.
+- Render checks `/healthz`, which verifies the app can answer and the database is reachable.
+- Optional bootstrap admin: set `ADMIN_USERNAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in Render once; the app creates or promotes that user on startup.
+- Challenge descriptions are rendered as text with line breaks, not trusted HTML; challenge links are restricted to `http`/`https`.
+
+Set these Render environment variables:
+
+```text
+APP_ENV=production
+DATABASE_URL=mysql://avnadmin:<YOUR_PASSWORD>@mysql-hack4gov-kleinricm-ae22.i.aivencloud.com:16267/defaultdb?ssl-mode=REQUIRED
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=<strong-password>
+```
+
+Notes:
+- Keep `ca.pem` in the repo root, or set `MYSQL_SSL_CA` to the certificate path if you move it.
+- Render free instances have ephemeral disk, so uploaded challenge files stored on local disk are not durable across redeploys/restarts.
+
+---
+
 ### Hack the planet
 Spin it up, drop in your own challenges, and let the neon scoreboard glow. PRs welcome.

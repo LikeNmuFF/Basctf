@@ -7,10 +7,11 @@ from app import create_app
 from app.extensions import db
 from app.models import User, Challenge
 from app.utils import hash_flag
+from config import get_config_name
 
 
 def seed():
-    app = create_app(os.environ.get('FLASK_ENV', 'default'))
+    app = create_app(get_config_name())
     with app.app_context():
         db.create_all()
 
@@ -35,6 +36,17 @@ def seed():
                 'difficulty': 'easy',
                 'points': 50,
                 'flag': 'CTF{h3ll0_w0rld}',
+            },
+            {
+                'title': 'Stego Portal',
+                'description': 'Welcome agent. The drop is hidden behind the portal word â€” click <a href="https://example.com/secret-drop" target="_blank" rel="noopener">portal</a> to retrieve the file and extract the flag.\n\nFlag format: CTF{...}',
+                'hint_1': 'View the page and notice the highlighted word in the description.',
+                'hint_2': 'Download from the linked page; the flag is inside a ZIP embedded as an image.',
+                'hint_3': 'Run binwalk or strings on the downloaded file.',
+                'category': 'web',
+                'difficulty': 'medium',
+                'points': 150,
+                'flag': 'CTF{stego_portal_passage}',
             },
             {
                 'title': 'Caesar\'s Secret',

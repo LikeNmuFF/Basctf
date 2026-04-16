@@ -1,14 +1,16 @@
 from datetime import datetime, timedelta
 from math import ceil
 from urllib.parse import urljoin, urlsplit
-from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_user, logout_user, login_required, current_user
+
+from flask import flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import or_
+
 from . import auth_bp
 from .forms import LoginForm, RegistrationForm
-from ..models import LoginAttempt, User
-from ..extensions import db
 from ..challenges.services import get_submission_stats_for_user
+from ..extensions import db
+from ..models import LoginAttempt, User
 
 MAX_LOGIN_ATTEMPTS = 5
 LOGIN_COOLDOWN_SECONDS = 60
@@ -37,7 +39,7 @@ def _get_login_cooldown_remaining(username: str, ip_address: str) -> int:
     recent_attempts = LoginAttempt.query.filter(
         LoginAttempt.attempted_at >= cutoff,
         LoginAttempt.is_success.is_(False),
-        or_(LoginAttempt.username == username, LoginAttempt.ip_address == ip_address)
+        or_(LoginAttempt.username == username, LoginAttempt.ip_address == ip_address),
     ).order_by(LoginAttempt.attempted_at.desc()).all()
 
     if len(recent_attempts) < MAX_LOGIN_ATTEMPTS:
@@ -108,8 +110,3 @@ def logout():
 def stats():
     stats_summary = get_submission_stats_for_user(current_user.id)
     return render_template('stats.html', stats_summary=stats_summary)
-
-@auth_bp.route('/secret_admin')
-def secret_admin():
-    return """This is a secret admin page! Only authorized users should see this.<br>
-Flag: CTF{hidden_admin_123}"""
