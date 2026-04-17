@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     solves = db.relationship('Solve', backref='user', lazy='dynamic', cascade='all, delete-orphan')
+    hint_usage = db.relationship('HintUsage', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     flag_submissions = db.relationship(
         'FlagSubmission',
         backref='user',
@@ -52,6 +53,7 @@ class Challenge(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     solves = db.relationship('Solve', backref='challenge', lazy='dynamic', cascade='all, delete-orphan')
+    hint_usage = db.relationship('HintUsage', backref='challenge', lazy='dynamic', cascade='all, delete-orphan')
     flag_submissions = db.relationship(
         'FlagSubmission',
         backref='challenge',
