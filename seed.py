@@ -46,8 +46,8 @@ def seed():
                 'title': 'Binary Basics',
                 'description': (
                     'You are given the following x86-64 Linux snippet from a stripped ELF binary:\n\n'
-                    '48 31 c0 48 89 c7 48 89 c6 48 8d 35 0e 00 00 00 48 8d 3d 0f 00 00 00 '\n
-                    'c6 00 43 54 46 7b 62 69 6e 5f 65 61 73 79 7d 0a e8 dc ff ff ff 2f 62 '\n
+                    '48 31 c0 48 89 c7 48 89 c6 48 8d 35 0e 00 00 00 48 8d 3d 0f 00 00 00 \n'
+                    'c6 00 43 54 46 7b 62 69 6e 5f 65 61 73 79 7d 0a e8 dc ff ff ff 2f 62 \n'
                     '69 6e 2f 73 68\n\n'
                     'The flag is printed by the binary when it runs. Identify the hidden flag from the string bytes above.'
                 ),
@@ -77,8 +77,8 @@ def seed():
             {
                 'title': 'Buffer Overflow',
                 'description': (
-                    'A vulnerable 64-bit binary reads a username into a fixed-size buffer and then checks for admin access. '\n
-                    'There is no stack canary, and the admin check compares the saved return address. '\n
+                    'A vulnerable 64-bit binary reads a username into a fixed-size buffer and then checks for admin access. \n'
+                    'There is no stack canary, and the admin check compares the saved return address. \n'
                     'Your goal is to overwrite the return address so the program prints the flag.\n\n'
                     'This is a reverse-engineering style binary challenge; the flag format is CTF{...}.'
                 ),
@@ -93,7 +93,7 @@ def seed():
             {
                 'title': 'RSA Shared Modulus',
                 'description': (
-                    'Two RSA ciphertexts were created with the same modulus but different public exponents. '\n
+                    'Two RSA ciphertexts were created with the same modulus but different public exponents. \n'
                     'Recover the original flag from the ciphertexts below.\n\n'
                     'n = 171731371\n'
                     'e1 = 3\n'
@@ -113,8 +113,8 @@ def seed():
             {
                 'title': 'ROP Gatekeeper',
                 'description': (
-                    'A hardened binary rejects direct calls to the flag function but exposes several gadgets. '\n
-                    'Your job is to build a return-oriented programming chain that jumps to the hidden flag routine. '\n
+                    'A hardened binary rejects direct calls to the flag function but exposes several gadgets. \n'
+                    'Your job is to build a return-oriented programming chain that jumps to the hidden flag routine. \n'
                     'The flag is stored in a read-only section and printed by the hidden function when executed.'
                 ),
                 'hint_1': 'Find a gadget sequence that calls the hidden function without using a direct address in the input.',
