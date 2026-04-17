@@ -23,7 +23,7 @@
           {{ challenge.solve_count }} solve{{ 's' if challenge.solve_count != 1 }}
         </span>
       </div>
-      <div class="detail-desc">{{ challenge.description | e | replace('\n', '<br>') | safe }}</div>
+      <div class="detail-desc">{{ challenge.description | e | replace('\n', '') | safe }}</div>
 
       <div class="hint-section">
         <h4>Hints (penalty applies)</h4>

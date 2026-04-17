@@ -132,11 +132,11 @@ def seed():
                 ),
                 'hint_1': 'Brute force small discrete logs by testing values of x from 0 to 96.',
                 'hint_2': 'The solution can be found quickly because the modulus is small.',
-                'hint_3': 'x = 64, so the flag is CTF{64}.',
+                'hint_3': 'x = 18, so the flag is CTF{18}.',
                 'category': 'crypto',
                 'difficulty': 'medium',
                 'points': 200,
-                'flag': 'CTF{64}',
+                'flag': 'CTF{18}',
             },
         ]
 
