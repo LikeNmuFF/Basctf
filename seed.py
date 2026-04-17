@@ -15,65 +15,128 @@ def seed():
     with app.app_context():
         db.create_all()
 
-        # Create admin user
-        if not User.query.filter_by(username='admin').first():
-            admin = User(username='admin', email='admin@ctf.local', is_admin=True)
-            admin.set_password('admin1234')
+        # Remove legacy admin accounts and create a secure admin user
+        for legacy_username in ['admin', 'adminx2']:
+            legacy_user = User.query.filter_by(username=legacy_username).first()
+            if legacy_user:
+                db.session.delete(legacy_user)
+                print(f'[+] Removed legacy admin user: {legacy_username}')
+
+        legacy_email_user = User.query.filter_by(email='admin@ctf.local').first()
+        if legacy_email_user and legacy_email_user.username != 'adminx3':
+            db.session.delete(legacy_email_user)
+            print('[+] Removed legacy admin account with email admin@ctf.local')
+
+        admin = User.query.filter_by(username='adminx3').first()
+        if admin:
+            admin.set_password('hack4govx1mpvl$e')
+            admin.is_admin = True
+            admin.email = 'admin@ctf.local'
             db.session.add(admin)
-            print('[+] Admin user created  →  admin / admin1234')
+            print('[+] Admin user updated  →  adminx3 / hack4govx1mpvl$e')
         else:
-            print('[*] Admin user already exists.')
+            admin = User(username='adminx3', email='admin@ctf.local', is_admin=True)
+            admin.set_password('hack4govx1mpvl$e')
+            db.session.add(admin)
+            print('[+] Admin user created  →  adminx3 / hack4govx1mpvl$e')
 
         # Sample challenges
         samples = [
             {
-                'title': 'Hello, World!',
-                'description': 'Find the flag hidden in the page source of http://example.ctf/hello.',
-                'hint_1': 'Inspect the HTML source code for the page.',
-                'hint_2': 'Search for a string that looks like CTF{...}.',
-                'hint_3': 'The flag is in a commented line with CTF{h3ll0_w0rld}.',
-                'category': 'web',
+                'title': 'Binary Basics',
+                'description': (
+                    'You are given the following x86-64 Linux snippet from a stripped ELF binary:\n\n'
+                    '48 31 c0 48 89 c7 48 89 c6 48 8d 35 0e 00 00 00 48 8d 3d 0f 00 00 00 '\n
+                    'c6 00 43 54 46 7b 62 69 6e 5f 65 61 73 79 7d 0a e8 dc ff ff ff 2f 62 '\n
+                    '69 6e 2f 73 68\n\n'
+                    'The flag is printed by the binary when it runs. Identify the hidden flag from the string bytes above.'
+                ),
+                'hint_1': 'Look at the ASCII bytes after the write syscall setup, especially near 43 54 46 7b.',
+                'hint_2': 'The bytes decode directly to the flag text: CTF{bin_easy}.',
+                'hint_3': 'The flag appears as a plain string in the data section.',
+                'category': 'binary',
                 'difficulty': 'easy',
-                'points': 50,
-                'flag': 'CTF{h3ll0_w0rld}',
+                'points': 100,
+                'flag': 'CTF{bin_easy}',
             },
             {
-                'title': 'Stego Portal',
-                'description': 'Welcome agent. The drop is hidden behind the portal word â€” click <a href="https://example.com/secret-drop" target="_blank" rel="noopener">portal</a> to retrieve the file and extract the flag.\n\nFlag format: CTF{...}',
-                'hint_1': 'View the page and notice the highlighted word in the description.',
-                'hint_2': 'Download from the linked page; the flag is inside a ZIP embedded as an image.',
-                'hint_3': 'Run binwalk or strings on the downloaded file.',
-                'category': 'web',
-                'difficulty': 'medium',
-                'points': 150,
-                'flag': 'CTF{stego_portal_passage}',
-            },
-            {
-                'title': 'Caesar\'s Secret',
-                'description': 'Decrypt this message: PGS{ebg13_vf_sha}.',
-                'hint_1': 'The text looks like a classic substitution cipher.',
-                'hint_2': 'ROT13 is often used in CTFs; apply it to the flag string.',
-                'hint_3': 'PGS becomes CTF after ROT13 and the rest becomes rot13_is_fun.',
+                'title': 'Simple XOR Cipher',
+                'description': (
+                    'Decrypt this ciphertext that was XORed with a single-byte key.\n\n'
+                    'Ciphertext (hex): 3f 0c 0d 0f 78 17 4f 0c 4a 0a 1f 0f 0f 75 17 4e 0c 1a 1f 0d\n\n'
+                    'The original plaintext is a flag in the format CTF{...}.'
+                ),
+                'hint_1': 'Try common single-byte keys such as 0x20, 0x41, or 0x5f.',
+                'hint_2': 'The plaintext starts with CTF{ and ends with }.',
+                'hint_3': 'The correct key is 0x15 and the recovered flag is CTF{x0r_magic}.',
                 'category': 'crypto',
                 'difficulty': 'easy',
-                'points': 75,
-                'flag': 'CTF{rot13_is_fun}',
-            },
-            {
-                'title': 'Magic Bytes',
-                'description': 'A file has been given to you. Determine its true type by inspecting the first few bytes (magic bytes). The flag is hidden inside.\n\nFile: magic.bin (not provided in this demo)',
-                'category': 'forensics',
-                'difficulty': 'medium',
                 'points': 100,
-                'flag': 'CTF{magic_bytes_matter}',
+                'flag': 'CTF{x0r_magic}',
             },
             {
-                'title': 'Recon 101',
-                'description': 'Find information about the domain: ctf-demo.example.com\n\nWhat is the name of the admin as listed in the WHOIS record?\nSubmit as CTF{firstname_lastname}',
-                'category': 'osint',
+                'title': 'Buffer Overflow',
+                'description': (
+                    'A vulnerable 64-bit binary reads a username into a fixed-size buffer and then checks for admin access. '\n
+                    'There is no stack canary, and the admin check compares the saved return address. '\n
+                    'Your goal is to overwrite the return address so the program prints the flag.\n\n'
+                    'This is a reverse-engineering style binary challenge; the flag format is CTF{...}.'
+                ),
+                'hint_1': 'The overflow happens at a 64-byte buffer. Look for a gadget that leads to the print_flag function.',
+                'hint_2': 'In a 64-bit binary, saved RBP plus return address are 16 bytes after the buffer start.',
+                'hint_3': 'The flag is CTF{overflow_medium}.',
+                'category': 'binary',
                 'difficulty': 'medium',
-                'points': 125,
-                'flag': 'CTF{john_doe}',
+                'points': 200,
+                'flag': 'CTF{overflow_medium}',
+            },
+            {
+                'title': 'RSA Shared Modulus',
+                'description': (
+                    'Two RSA ciphertexts were created with the same modulus but different public exponents. '\n
+                    'Recover the original flag from the ciphertexts below.\n\n'
+                    'n = 171731371\n'
+                    'e1 = 3\n'
+                    'e2 = 5\n'
+                    'c1 = 104359143\n'
+                    'c2 = 65723194\n\n'
+                    'The flag is encoded as an ASCII string inside the message and has the format CTF{...}.'
+                ),
+                'hint_1': 'Use the common modulus attack for RSA when e1 and e2 share the same n.',
+                'hint_2': 'Compute the message by combining m^e1 and m^e2 to recover m.',
+                'hint_3': 'The recovered plaintext is CTF{shared_rsa}.',
+                'category': 'crypto',
+                'difficulty': 'hard',
+                'points': 300,
+                'flag': 'CTF{shared_rsa}',
+            },
+            {
+                'title': 'ROP Gatekeeper',
+                'description': (
+                    'A hardened binary rejects direct calls to the flag function but exposes several gadgets. '\n
+                    'Your job is to build a return-oriented programming chain that jumps to the hidden flag routine. '\n
+                    'The flag is stored in a read-only section and printed by the hidden function when executed.'
+                ),
+                'hint_1': 'Find a gadget sequence that calls the hidden function without using a direct address in the input.',
+                'hint_2': 'This is a hard binary challenge; think in terms of ROP and indirect control flow.',
+                'hint_3': 'The flag is CTF{rop_hardcore}.',
+                'category': 'binary',
+                'difficulty': 'hard',
+                'points': 350,
+                'flag': 'CTF{rop_hardcore}',
+            },
+            {
+                'title': 'Discrete Log Puzzle',
+                'description': (
+                    'Solve for x in the equation 3^x mod 97 = 64. The flag is the ASCII representation of x in the format CTF{...}.'
+                ),
+                'hint_1': 'Brute force small discrete logs by testing values of x from 0 to 96.',
+                'hint_2': 'The solution can be found quickly because the modulus is small.',
+                'hint_3': 'x = 64, so the flag is CTF{64}.',
+                'category': 'crypto',
+                'difficulty': 'medium',
+                'points': 200,
+                'flag': 'CTF{64}',
             },
         ]
 

@@ -59,7 +59,7 @@ pip install -r requirements.txt
 mysql -u root -p -e "CREATE DATABASE ctf_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 cp .env.example .env          # set DATABASE_URL + SECRET_KEY
-python seed.py                # creates admin/admin1234 + sample challenges
+python seed.py                # creates adminx3/hack4govx1mpvl$e + sample challenges
 python run.py                 # visit http://localhost:5000
 ```
 
