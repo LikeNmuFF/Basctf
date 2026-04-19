@@ -30,6 +30,10 @@
        class="nav-link admin-link {% if request.blueprint == 'admin' %}active{% endif %}">Admin</a>
     {% endif %}
     <span class="nav-user">
+      {% if not current_user.is_admin %}
+        {% set ranking = get_user_ranking(current_user.id) %}
+        <span class="nav-ranking ranking-{{ 'top3' if ranking and ranking <= 3 else 'other' }} ranking-pos-{{ ranking or 0 }}">{{ format_ranking_position(ranking) }}</span>
+      {% endif %}
       {{ current_user.username }} &mdash; 
       <span class="nav-score {% if current_user.score < 0 %}score-negative{% endif %}">
         {{ current_user.score }} pts

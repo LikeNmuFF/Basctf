@@ -114,6 +114,43 @@ body::before {
   border-radius: var(--radius);
   margin-right: 4px;
 }
+.nav-ranking {
+  font-weight: bold;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,140,0,0.3);
+}
+
+/* Ranking position colors */
+.nav-ranking.ranking-pos-1 {
+  color: #FFD700; /* Gold */
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.4);
+  text-shadow: 0 0 2px rgba(255, 215, 0, 0.3);
+}
+
+.nav-ranking.ranking-pos-2 {
+  color: #C0C0C0; /* Silver */
+  background: rgba(192, 192, 192, 0.1);
+  border-color: rgba(192, 192, 192, 0.4);
+  text-shadow: 0 0 2px rgba(192, 192, 192, 0.3);
+}
+
+.nav-ranking.ranking-pos-3 {
+  color: #CD7F32; /* Bronze */
+  background: rgba(205, 127, 50, 0.1);
+  border-color: rgba(205, 127, 50, 0.4);
+  text-shadow: 0 0 2px rgba(205, 127, 50, 0.3);
+}
+
+.nav-ranking.ranking-pos-0 {
+  color: var(--text-muted);
+  background: rgba(128, 128, 128, 0.1);
+  border-color: rgba(128, 128, 128, 0.3);
+}
+
 .nav-score { color: var(--green); font-weight: bold; }
 .nav-score.score-negative { color: var(--red); }
 

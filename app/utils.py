@@ -58,6 +58,38 @@ def normalize_external_link(link: str | None) -> str | None:
     return f'https://{cleaned}'
 
 
+def get_user_ranking(user_id: int) -> int | None:
+    """Get the ranking position of a user based on their score."""
+    from .models import User
+    
+    # Get all non-admin users ordered by score desc, then by creation date asc
+    ranked_users = User.query.filter_by(is_admin=False).order_by(
+        User.score.desc(), User.created_at.asc()
+    ).all()
+    
+    # Find the position of the user
+    for position, user in enumerate(ranked_users, 1):
+        if user.id == user_id:
+            return position
+    
+    return None
+
+
+def format_ranking_position(position: int | None) -> str:
+    """Format ranking position with ordinal suffix (1st, 2nd, 3rd, etc.)."""
+    if position is None:
+        return ""
+    
+    if position == 1:
+        return "1st"
+    elif position == 2:
+        return "2nd"
+    elif position == 3:
+        return "3rd"
+    else:
+        return f"{position}th"
+
+
 CATEGORIES = [
     ('web', 'Web'),
     ('crypto', 'Cryptography'),

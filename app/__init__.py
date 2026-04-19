@@ -39,6 +39,14 @@ def create_app(config_name='default'):
 
     from flask import render_template, request
     from .models import Challenge, Solve, User
+    from .utils import get_user_ranking, format_ranking_position
+
+    @app.context_processor
+    def utility_processor():
+        return {
+            'get_user_ranking': get_user_ranking,
+            'format_ranking_position': format_ranking_position,
+        }
 
     @app.route('/')
     def index():
