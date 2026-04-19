@@ -57,6 +57,13 @@
                 {{ 'Revoke Admin' if user.is_admin else 'Make Admin' }}
               </button>
             </form>
+            <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-danger btn-sm"
+                      data-confirm="Delete user {{ user.username }}? This cannot be undone.">
+                Delete
+              </button>
+            </form>
             {% else %}
             <span style="color:var(--text-muted); font-size:0.8rem;">—</span>
             {% endif %}
