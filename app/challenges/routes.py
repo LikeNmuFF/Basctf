@@ -95,3 +95,63 @@ def challenge_hint(challenge_id, hint_number):
     flash(message, 'success' if success else 'danger')
 
     return redirect(url_for('challenges.challenge_detail', challenge_id=challenge.id))
+
+
+@challenges_bp.route('/<int:challenge_id>/rate', methods=['POST'])
+@login_required
+def rate_challenge_route(challenge_id):
+    from ..services import rate_challenge, get_challenge_rating_stats, get_user_challenge_rating, remove_challenge_rating
+    from flask import jsonify
+    
+    challenge = get_challenge_by_id(challenge_id)
+    if not challenge.is_active:
+        return jsonify({'error': 'Challenge not available'}), 404
+    
+    data = request.get_json()
+    if not data or 'rating' not in data:
+        return jsonify({'error': 'Invalid request'}), 400
+    
+    rating_value = data['rating']
+    if rating_value not in ['like', 'dislike', 'remove']:
+        return jsonify({'error': 'Invalid rating value'}), 400
+    
+    if rating_value == 'remove':
+        success, result = remove_challenge_rating(current_user.id, challenge_id)
+    else:
+        # Convert string to boolean: True for like, False for dislike
+        bool_rating = (rating_value == 'like')
+        success, result = rate_challenge(current_user.id, challenge_id, bool_rating)
+    
+    if not success:
+        return jsonify({'error': result.get('message', 'Unknown error')}), 400
+    
+    # Get updated stats and user's current rating
+    stats = get_challenge_rating_stats(challenge_id)
+    user_rating = get_user_challenge_rating(current_user.id, challenge_id)
+    
+    return jsonify({
+        'success': True,
+        'message': result.get('message'),
+        'stats': stats,
+        'user_rating': user_rating  # True for like, False for dislike, None for no rating
+    })
+
+
+@challenges_bp.route('/<int:challenge_id>/rating', methods=['GET'])
+@login_required
+def get_challenge_rating(challenge_id):
+    from ..services import get_challenge_rating_stats, get_user_challenge_rating
+    from flask import jsonify
+    
+    challenge = get_challenge_by_id(challenge_id)
+    if not challenge.is_active:
+        return jsonify({'error': 'Challenge not available'}), 404
+    
+    stats = get_challenge_rating_stats(challenge_id)
+    user_rating = get_user_challenge_rating(current_user.id, challenge_id)
+    
+    return jsonify({
+        'success': True,
+        'stats': stats,
+        'user_rating': user_rating  # True for like, False for dislike, None for no rating
+    })

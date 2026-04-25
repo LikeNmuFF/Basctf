@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Challenges — CTF Platform{% endblock %}
+{% block title %}Challenges - CTF Platform{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -7,7 +7,7 @@
     <div>
       <h1 class="page-title"><span class="prompt">$</span> ls ./challenges</h1>
       <p class="page-subtitle">
-        {{ solved_ids|length }} solved &mdash; {{ visible_count }} shown / {{ total_count }} total
+        {{ solved_ids|length }} solved - {{ visible_count }} shown / {{ total_count }} total
       </p>
     </div>
   </div>
@@ -53,25 +53,29 @@
         {{ category | upper }}
         <span style="color:var(--text-muted); font-size:0.7rem;">({{ challenges|length }})</span>
       </div>
-      <div class="challenge-grid">
-        {% for ch in challenges %}
-        <a href="{{ url_for('challenges.challenge_detail', challenge_id=ch.id) }}"
-          class="challenge-card {% if ch.id in solved_ids %}solved{% endif %}">
-          <div class="ch-title">{{ ch.title }}</div>
-          <div class="ch-desc">{{ ch.description }}</div>
-          <div class="ch-meta">
-            <div class="ch-meta-left">
-              <span class="ch-points">{{ ch.points }} pts</span>
-              <span class="badge-diff badge-{{ ch.difficulty }}">{{ ch.difficulty|capitalize }}</span>
-            </div>
-            {% if ch.id in solved_ids %}
-            <span class="ch-solved-badge">&#10003; SOLVED</span>
-            {% else %}
-            <span class="ch-solves">{{ ch.solve_count }} solve{{ 's' if ch.solve_count != 1 }}</span>
-            {% endif %}
-          </div>
-        </a>
-        {% endfor %}
+       <div class="challenge-grid">
+         {% for ch in challenges %}
+         <a href="{{ url_for('challenges.challenge_detail', challenge_id=ch.id) }}"
+           class="challenge-card {% if ch.id in solved_ids %}solved{% endif %}"
+           data-challenge-id="{{ ch.id }}">
+           <div class="ch-title">{{ ch.title }}</div>
+           <div class="ch-desc">{{ ch.description }}</div>
+           <div class="ch-meta">
+             <div class="ch-meta-left">
+               <span class="ch-points">{{ ch.points }} pts</span>
+               <span class="badge-diff badge-{{ ch.difficulty }}">{{ ch.difficulty|capitalize }}</span>
+             </div>
+             <div class="ch-meta-right">
+               <span class="ch-rating" data-challenge-id="{{ ch.id }}">--%</span>
+               {% if ch.id in solved_ids %}
+               <span class="ch-solved-badge">&#10003; SOLVED</span>
+               {% else %}
+               <span class="ch-solves">{{ ch.solve_count }} solve{{ 's' if ch.solve_count != 1 }}</span>
+               {% endif %}
+             </div>
+           </div>
+         </a>
+         {% endfor %}
       </div>
     </div>
     {% endfor %}
@@ -89,7 +93,7 @@
     {% endif %}
   </div>
 
-  <div class="challenges-sidebar" hidden>
+  <div class="challenges-sidebar">
     <div class="sidebar-header">
       <h3><span class="prompt">$</span> tail -f ./solves.log</h3>
       <p class="sidebar-subtitle">Recent solves</p>
@@ -120,4 +124,32 @@
     </div>
   </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load rating percentages for all visible challenges
+    const challengeCards = document.querySelectorAll('.challenge-card');
+    
+    challengeCards.forEach(card => {
+        const challengeId = card.getAttribute('data-challenge-id');
+        const ratingSpan = card.querySelector('.ch-rating');
+        
+        if (challengeId && ratingSpan) {
+            fetch(`/challenges/${challengeId}/rating`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        ratingSpan.textContent = data.stats.like_percentage + '%';
+                    }
+                })
+                .catch(err => {
+                    console.error(`Failed to load rating for challenge ${challengeId}:`, err);
+                    ratingSpan.textContent = '---%';
+                });
+        }
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}

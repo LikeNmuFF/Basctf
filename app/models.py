@@ -101,6 +101,28 @@ class HintUsage(db.Model):
         return f'<HintUsage user={self.user_id} challenge={self.challenge_id} used_hints={self.used_hints}>'
 
 
+class ChallengeRating(db.Model):
+    __tablename__ = 'challenge_ratings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('challenges.id'), nullable=False)
+    # True = like, False = dislike
+    rating = db.Column(db.Boolean, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'challenge_id', name='unique_user_challenge_rating'),
+    )
+
+    # Relationships
+    user = db.relationship('User', backref=db.backref('challenge_ratings', lazy='dynamic'))
+    challenge = db.relationship('Challenge', backref=db.backref('ratings', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<ChallengeRating user={self.user_id} challenge={self.challenge_id} rating={self.rating}>'
+
+
 class FlagSubmission(db.Model):
     __tablename__ = 'flag_submissions'
 

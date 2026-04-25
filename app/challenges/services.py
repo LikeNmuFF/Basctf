@@ -223,3 +223,134 @@ def get_submission_stats_for_user(user_id: int) -> dict:
         'most_targeted': most_targeted,
         'chart_points': chart_points,
     }
+
+
+def get_challenge_rating_stats(challenge_id: int) -> dict:
+    """
+    Get rating statistics for a challenge.
+    Returns dict with like_count, dislike_count, total_votes, like_percentage
+    """
+    from ..models import ChallengeRating
+    
+    likes = ChallengeRating.query.filter_by(challenge_id=challenge_id, rating=True).count()
+    dislikes = ChallengeRating.query.filter_by(challenge_id=challenge_id, rating=False).count()
+    total_votes = likes + dislikes
+    
+    like_percentage = 0
+    if total_votes > 0:
+        like_percentage = round((likes / total_votes) * 100)
+    
+    return {
+        'like_count': likes,
+        'dislike_count': dislikes,
+        'total_votes': total_votes,
+        'like_percentage': like_percentage
+    }
+
+
+def get_user_challenge_rating(user_id: int, challenge_id: int) -> bool | None:
+    """
+    Get current user's rating for a challenge.
+    Returns True for like, False for dislike, None if not rated
+    """
+    from ..models import ChallengeRating
+    
+    rating = ChallengeRating.query.filter_by(
+        user_id=user_id, 
+        challenge_id=challenge_id
+    ).first()
+    
+    return rating.rating if rating else None
+
+
+def rate_challenge(user_id: int, challenge_id: int, rating_value: bool) -> tuple[bool, str]:
+    """
+    Rate a challenge (like or dislike).
+    If user already rated, update their rating.
+    Returns (success: bool, message: str)
+    """
+    from ..models import ChallengeRating, Challenge, User
+    from ..extensions import db
+    
+    # Validate challenge exists and is active
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge or not challenge.is_active:
+        return False, 'Challenge not found or not available'
+    
+    # Validate user exists
+    user = User.query.get(user_id)
+    if not user:
+        return False, 'User not found'
+    
+    # Check if user already rated this challenge
+    existing_rating = ChallengeRating.query.filter_by(
+        user_id=user_id,
+        challenge_id=challenge_id
+    ).first()
+    
+    if existing_rating:
+        # Update existing rating
+        if existing_rating.rating == rating_value:
+            # User clicked the same button again - remove rating (toggle off)
+            db.session.delete(existing_rating)
+            db.session.commit()
+            action = 'removed'
+        else:
+            # User changed their rating
+            existing_rating.rating = rating_value
+            db.session.commit()
+            action = 'updated'
+    else:
+        # Create new rating
+        new_rating = ChallengeRating(
+            user_id=user_id,
+            challenge_id=challenge_id,
+            rating=rating_value
+        )
+        db.session.add(new_rating)
+        db.session.commit()
+        action = 'added'
+    
+    # Get updated stats
+    stats = get_challenge_rating_stats(challenge_id)
+    
+    if action == 'removed':
+        message = 'Your rating has been removed'
+    elif action == 'updated':
+        message = 'Your rating has been updated'
+    else:
+        message = 'Your rating has been recorded'
+    
+    return True, {
+        'message': message,
+        'action': action,
+        'user_rating': rating_value if action != 'removed' else None,
+        'stats': stats
+    }
+
+
+def remove_challenge_rating(user_id: int, challenge_id: int) -> tuple[bool, str]:
+    """
+    Remove user's rating for a challenge.
+    Returns (success: bool, message: str)
+    """
+    from ..models import ChallengeRating
+    from ..extensions import db
+    
+    rating = ChallengeRating.query.filter_by(
+        user_id=user_id,
+        challenge_id=challenge_id
+    ).first()
+    
+    if not rating:
+        return False, 'You have not rated this challenge'
+    
+    db.session.delete(rating)
+    db.session.commit()
+    
+    stats = get_challenge_rating_stats(challenge_id)
+    
+    return True, {
+        'message': 'Your rating has been removed',
+        'stats': stats
+    }

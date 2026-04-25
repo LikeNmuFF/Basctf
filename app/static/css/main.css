@@ -280,21 +280,30 @@ body::before {
 
 .ch-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
 .ch-meta-left { display: flex; align-items: center; gap: 0.5rem; }
+.ch-meta-right { display: flex; align-items: center; gap: 0.75rem; }
 .ch-points {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--yellow);
-  font-weight: bold;
+   font-family: var(--font-mono);
+   font-size: 0.9rem;
+   color: var(--yellow);
+   font-weight: bold;
+}
+.ch-rating {
+   font-family: var(--font-mono);
+   font-size: 0.8rem;
+   color: var(--cyan);
+   font-weight: 600;
+   min-width: 35px;
+   text-align: right;
 }
 .ch-solves { font-size: 0.75rem; color: var(--text-muted); }
 .ch-solved-badge {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--green);
-  background: var(--green-glow);
-  padding: 2px 8px;
-  border-radius: 2px;
-  border: 1px solid rgba(0,255,136,0.2);
+   font-family: var(--font-mono);
+   font-size: 0.7rem;
+   color: var(--green);
+   background: var(--green-glow);
+   padding: 2px 8px;
+   border-radius: 2px;
+   border: 1px solid rgba(0,255,136,0.2);
 }
 
 /* ── CHALLENGE DETAIL ── */
@@ -308,11 +317,43 @@ body::before {
   margin-bottom: 1.5rem;
 }
 .detail-title {
-  font-family: var(--font-ui);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 0.5rem;
+   font-family: var(--font-ui);
+   font-size: 1.8rem;
+   font-weight: 700;
+   color: var(--text-main);
+   margin-bottom: 0.5rem;
+}
+.detail-title-row {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   gap: 1.5rem;
+   margin-bottom: 1rem;
+}
+.detail-title-row .detail-title {
+   flex: 1;
+   margin-bottom: 0;
+}
+.rating-controls-compact {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+   white-space: nowrap;
+}
+.rating-percentage-text {
+   font-size: 0.85rem;
+   color: var(--text-dim);
+   font-weight: 500;
+   min-width: 40px;
+}
+.rating-btn-compact {
+   padding: 0.25rem 0.5rem;
+   font-size: 0.75rem;
+   line-height: 1;
+}
+.rating-btn-compact .btn-icon {
+   margin-right: 0;
+   font-size: 0.9rem;
 }
 .detail-meta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .badge {
@@ -1066,6 +1107,72 @@ textarea.form-control { resize: vertical; min-height: 100px; font-family: var(--
     padding: 2px 6px;
     border-radius: 3px;
     border: 1px solid rgba(0,255,136,0.3);
+}
+
+/* ── RATING SYSTEM ── */
+.rating-section {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.rating-stats {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--green);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.rating-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.rating-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rating-btn .btn-icon {
+    font-size: 1rem;
+}
+
+.rating-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
+
+.rating-btn.active {
+    opacity: 1;
+    transform: none;
+}
+
+.rating-feedback {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ── RESPONSIVE ── */

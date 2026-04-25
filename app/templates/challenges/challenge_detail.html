@@ -1,29 +1,42 @@
 {% extends "base.html" %}
-{% block title %}{{ challenge.title }} — CTF Platform{% endblock %}
+{% block title %}{{ challenge.title }} - CTF Platform{% endblock %}
 
 {% block content %}
 <div class="container">
   <div class="mb-2">
-    <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary btn-sm">← Back</a>
+    <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary btn-sm">&lt; Back</a>
   </div>
 
-  <div class="challenge-detail">
-    <div class="detail-header">
-      <h1 class="detail-title">{{ challenge.title }}</h1>
-      <div class="detail-meta">
-        <span class="badge badge-cat">{{ challenge.category | upper }}</span>
-        <span class="badge badge-diff badge-{{ challenge.difficulty }}">{{ challenge.difficulty|capitalize }}</span>
-        <span class="badge badge-pts">{{ challenge.points }} pts</span>
-        {% if already_solved %}
-          <span class="badge badge-solved-y">&#10003; SOLVED</span>
-        {% else %}
-          <span class="badge badge-solved-n">UNSOLVED</span>
-        {% endif %}
-        <span class="badge" style="color:var(--text-dim);border-color:var(--border);">
-          {{ challenge.solve_count }} solve{{ 's' if challenge.solve_count != 1 }}
-        </span>
-      </div>
-      <div class="detail-desc">{{ challenge.description | e | replace('\n', '') | safe }}</div>
+   <div class="challenge-detail">
+     <div class="detail-header">
+       <div class="detail-title-row">
+         <h1 class="detail-title">{{ challenge.title }}</h1>
+         <div class="rating-controls-compact">
+           <span id="rating-percentage-compact" class="rating-percentage-text">--%</span>
+           <button id="like-btn" class="rating-btn-compact btn btn-sm btn-outline-secondary">
+             <span class="btn-icon">👍</span>
+           </button>
+           <button id="dislike-btn" class="rating-btn-compact btn btn-sm btn-outline-secondary">
+             <span class="btn-icon">👎</span>
+           </button>
+         </div>
+       </div>
+        <div class="detail-meta">
+          <span class="badge badge-cat">{{ challenge.category | upper }}</span>
+          <span class="badge badge-diff badge-{{ challenge.difficulty }}">{{ challenge.difficulty|capitalize }}</span>
+          <span class="badge badge-pts">{{ challenge.points }} pts</span>
+          {% if already_solved %}
+            <span class="badge badge-solved-y">&#10003; SOLVED</span>
+          {% else %}
+            <span class="badge badge-solved-n">UNSOLVED</span>
+          {% endif %}
+          <span class="badge" style="color:var(--text-dim);border-color:var(--border);">
+            {{ challenge.solve_count }} solve{{ 's' if challenge.solve_count != 1 }}
+          </span>
+        </div>
+        <div id="rating-feedback" class="rating-feedback mt-2"></div>
+       
+       <div class="detail-desc">{{ challenge.description | e | replace('\n', '') | safe }}</div>
 
       <div class="hint-section">
         <h4>Hints (penalty applies)</h4>
@@ -115,7 +128,129 @@
         After 3 wrong submissions in a row on this challenge, each additional wrong attempt adds a 5 second wait.
       </p>
     </div>
-    {% endif %}
-  </div>
-</div>
+     {% endif %}
+   </div>
+ </div>
+ 
+ {% block extra_js %}
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const challengeId = {{ challenge.id }};
+      const likeBtn = document.getElementById('like-btn');
+      const dislikeBtn = document.getElementById('dislike-btn');
+      const ratingPercentageCompact = document.getElementById('rating-percentage-compact');
+      const ratingFeedback = document.getElementById('rating-feedback');
+      
+      // Initialize rating display
+      function initRating() {
+          fetch(`/challenges/${challengeId}/rating`)
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      ratingPercentageCompact.textContent = data.stats.like_percentage + '%';
+                      updateButtonStates(data.user_rating);
+                  }
+              })
+              .catch(err => {
+                  console.error('Failed to load rating:', err);
+                  ratingPercentageCompact.textContent = '0%';
+              });
+      }
+      
+      // Update button states based on user's current rating
+      function updateButtonStates(userRating) {
+          // Remove active states first
+          likeBtn.classList.remove('active', 'btn-outline-secondary');
+          likeBtn.classList.add('btn-outline-secondary');
+          dislikeBtn.classList.remove('active', 'btn-outline-secondary');
+          dislikeBtn.classList.add('btn-outline-secondary');
+          
+          // Set active state based on user rating
+          if (userRating === true) {
+              likeBtn.classList.remove('btn-outline-secondary');
+              likeBtn.classList.add('active', 'btn-primary');
+          } else if (userRating === false) {
+              dislikeBtn.classList.remove('btn-outline-secondary');
+              dislikeBtn.classList.add('active', 'btn-primary');
+          }
+          // If userRating is null/undefined, both buttons remain in outline state
+      }
+      
+      // Handle like button click
+      likeBtn.addEventListener('click', function() {
+          submitRating('like');
+      });
+      
+      // Handle dislike button click
+      dislikeBtn.addEventListener('click', function() {
+          submitRating('dislike');
+      });
+      
+      // Submit rating via AJAX
+      function submitRating(ratingType) {
+          // Disable buttons during request
+          likeBtn.disabled = true;
+          dislikeBtn.disabled = true;
+          
+          fetch(`/challenges/${challengeId}/rate`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': document.querySelector('[name=csrf_token]').value
+              },
+              body: JSON.stringify({ rating: ratingType })
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // Update percentage display
+                  ratingPercentageCompact.textContent = data.stats.like_percentage + '%';
+                  
+                  // Update button states
+                  updateButtonStates(data.user_rating);
+                  
+                  // Show feedback
+                  ratingFeedback.textContent = data.message;
+                  ratingFeedback.className = 'rating-feedback mt-2 alert alert-success';
+                  
+                  // Hide feedback after 3 seconds
+                  setTimeout(() => {
+                      ratingFeedback.textContent = '';
+                      ratingFeedback.className = 'rating-feedback mt-2';
+                  }, 3000);
+              } else {
+                  // Show error
+                  ratingFeedback.textContent = data.error || 'Failed to submit rating';
+                  ratingFeedback.className = 'rating-feedback mt-2 alert alert-danger';
+                  
+                  // Hide feedback after 3 seconds
+                  setTimeout(() => {
+                      ratingFeedback.textContent = '';
+                      ratingFeedback.className = 'rating-feedback mt-2';
+                  }, 3000);
+              }
+          })
+          .catch(err => {
+              console.error('Error submitting rating:', err);
+              ratingFeedback.textContent = 'Network error. Please try again.';
+              ratingFeedback.className = 'rating-feedback mt-2 alert alert-danger';
+              
+              // Hide feedback after 3 seconds
+              setTimeout(() => {
+                  ratingFeedback.textContent = '';
+                  ratingFeedback.className = 'rating-feedback mt-2';
+              }, 3000);
+          })
+          .finally(() => {
+              // Re-enable buttons
+              likeBtn.disabled = false;
+              dislikeBtn.disabled = false;
+          });
+      }
+      
+      // Initialize on page load
+      initRating();
+  });
+  </script>
+ {% endblock %}
 {% endblock %}
