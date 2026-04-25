@@ -110,7 +110,7 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=<strong-password>
 ```
 
-Notes:
+Notes():
 
 - Keep `ca.pem` in the repo root, or set `MYSQL_SSL_CA` to the certificate path if you move it.
 - Render free instances have ephemeral disk, so uploaded challenge files stored on local disk are not durable across redeploys/restarts.
