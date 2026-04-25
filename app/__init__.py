@@ -37,6 +37,9 @@ def create_app(config_name='default'):
     from .admin import admin_bp
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
+    from .activity import activity_bp
+    app.register_blueprint(activity_bp, url_prefix='/activity')
+
     from flask import render_template, request
     from .models import Challenge, Solve, User
     from .utils import get_user_ranking, format_ranking_position

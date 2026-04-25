@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Activity - CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header d-flex justify-between align-center">
+    <div>
+      <h1 class="page-title"><span class="prompt">$</span> tail -f ./activity.log</h1>
+      <p class="page-subtitle">Live feed of challenge solves</p>
+    </div>
+    <div class="page-actions">
+      <a href="{{ url_for('challenges.list_challenges') }}" class="btn btn-secondary btn-sm">← Back to Challenges</a>
+    </div>
+  </div>
+
+  {% if solves %}
+  <div class="activity-feed">
+    {% for solve in solves %}
+    <div class="activity-item">
+      <div class="activity-info">
+        <span class="activity-user">{{ solve.user.username }}</span>
+        <span class="activity-action">solved</span>
+        <span class="activity-challenge">{{ solve.challenge.title }}</span>
+        <span class="activity-time">{{ solve.solved_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+      </div>
+      {% if solve.user.id == current_user.id %}
+      <span class="activity-own">(You)</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">!</div>
+    <div>No recent activity. Be the first to solve a challenge!</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

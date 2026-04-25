@@ -15,21 +15,16 @@
   <form id="challenge-filter-form" class="filter-bar" method="GET">
     <div class="filter-field">
       <label for="search-input">Search</label>
-      <input
-        id="search-input"
-        type="text"
-        name="q"
-        value="{{ filters.q }}"
-        placeholder="Search title or description"
+      <input id="search-input" type="text" name="q" value="{{ filters.q }}" placeholder="Search title or description"
         class="form-control">
     </div>
 
     <div class="filter-field">
       <label for="category-select">Category</label>
       <select id="category-select" name="category" class="form-control">
-        <option value="all" {% if filters.category == 'all' %}selected{% endif %}>All categories</option>
+        <option value="all" {% if filters.category=='all' %}selected{% endif %}>All categories</option>
         {% for value, label in categories %}
-          <option value="{{ value }}" {% if filters.category == value %}selected{% endif %}>{{ label }}</option>
+        <option value="{{ value }}" {% if filters.category==value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
     </div>
@@ -37,9 +32,9 @@
     <div class="filter-field">
       <label for="difficulty-select">Difficulty</label>
       <select id="difficulty-select" name="difficulty" class="form-control">
-        <option value="all" {% if filters.difficulty == 'all' %}selected{% endif %}>All difficulties</option>
+        <option value="all" {% if filters.difficulty=='all' %}selected{% endif %}>All difficulties</option>
         {% for value, label in difficulties %}
-          <option value="{{ value }}" {% if filters.difficulty == value %}selected{% endif %}>{{ label }}</option>
+        <option value="{{ value }}" {% if filters.difficulty==value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
     </div>
@@ -50,7 +45,8 @@
     </div>
   </form>
 
-  {% if grouped %}
+  <div class="challenges-main">
+    {% if grouped %}
     {% for category, challenges in grouped.items() %}
     <div class="category-section">
       <div class="category-label">
@@ -60,7 +56,7 @@
       <div class="challenge-grid">
         {% for ch in challenges %}
         <a href="{{ url_for('challenges.challenge_detail', challenge_id=ch.id) }}"
-           class="challenge-card {% if ch.id in solved_ids %}solved{% endif %}">
+          class="challenge-card {% if ch.id in solved_ids %}solved{% endif %}">
           <div class="ch-title">{{ ch.title }}</div>
           <div class="ch-desc">{{ ch.description }}</div>
           <div class="ch-meta">
@@ -69,9 +65,9 @@
               <span class="badge-diff badge-{{ ch.difficulty }}">{{ ch.difficulty|capitalize }}</span>
             </div>
             {% if ch.id in solved_ids %}
-              <span class="ch-solved-badge">&#10003; SOLVED</span>
+            <span class="ch-solved-badge">&#10003; SOLVED</span>
             {% else %}
-              <span class="ch-solves">{{ ch.solve_count }} solve{{ 's' if ch.solve_count != 1 }}</span>
+            <span class="ch-solves">{{ ch.solve_count }} solve{{ 's' if ch.solve_count != 1 }}</span>
             {% endif %}
           </div>
         </a>
@@ -79,7 +75,7 @@
       </div>
     </div>
     {% endfor %}
-  {% else %}
+    {% else %}
     <div class="empty-state">
       <div class="empty-icon">&#9888;</div>
       <div>No challenges match your filters.</div>
@@ -90,6 +86,38 @@
         {% endif %}
       </div>
     </div>
-  {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="challenges-sidebar" hidden>
+    <div class="sidebar-header">
+      <h3><span class="prompt">$</span> tail -f ./solves.log</h3>
+      <p class="sidebar-subtitle">Recent solves</p>
+    </div>
+    <div class="notifications-list">
+      {% if recent_solves %}
+      {% for solve in recent_solves %}
+      <div class="notification-item">
+          <div class="notification-content">
+            <span class="notification-user">{{ solve.user.username }}</span>
+            <span class="notification-action">solve</span>
+            <span class="notification-difficulty">the {{ solve.challenge.difficulty|lower }} challenge</span>
+            <span class="notification-challenge">{{ solve.challenge.title }}</span>
+            <span class="notification-time">{{ solve.solved_at.strftime('%H:%M') }}</span>
+          </div>
+        {% if solve.user.id != current_user.id %}
+        <span class="notification-badge">new</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="notification-item empty">
+        <div class="notification-content">
+          <span>No recent solves</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

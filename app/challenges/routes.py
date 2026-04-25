@@ -27,10 +27,20 @@ def list_challenges():
     visible_count = sum(len(lst) for lst in grouped.values())
     total_count = len(get_all_active_challenges())
     solved_ids = get_solved_ids_for_user(current_user.id)
+    
+    # Get recent solves for the sidebar (last 10 solves from active challenges)
+    from ..models import Solve, User, Challenge
+    recent_solves = Solve.query.join(User).join(Challenge).filter(
+        Challenge.is_active == True
+    ).order_by(
+        Solve.solved_at.desc()
+    ).limit(10).all()
+
     return render_template(
         'challenges.html',
         grouped=grouped,
         solved_ids=solved_ids,
+        recent_solves=recent_solves,
         filters={
             'category': category,
             'difficulty': difficulty,

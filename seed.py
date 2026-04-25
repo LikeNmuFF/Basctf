@@ -63,7 +63,7 @@ def seed():
                 'title': 'Simple XOR Cipher',
                 'description': (
                     'Decrypt this ciphertext that was XORed with a single-byte key.\n\n'
-                    'Ciphertext (hex): 3f 0c 0d 0f 78 17 4f 0c 4a 0a 1f 0f 0f 75 17 4e 0c 1a 1f 0d\n\n'
+                    'Ciphertext (hex): 56 41 53 6e 6d 25 67 4a 78 74 72 7c 76 68\n\n'
                     'The original plaintext is a flag in the format CTF{...}.'
                 ),
                 'hint_1': 'Try common single-byte keys such as 0x20, 0x41, or 0x5f.',
@@ -79,8 +79,12 @@ def seed():
                 'description': (
                     'A vulnerable 64-bit binary reads a username into a fixed-size buffer and then checks for admin access. \n'
                     'There is no stack canary, and the admin check compares the saved return address. \n'
-                    'Your goal is to overwrite the return address so the program prints the flag.\n\n'
-                    'This is a reverse-engineering style binary challenge; the flag format is CTF{...}.'
+                    'We managed to dump the memory of the vulnerable function. The flag is stored on the stack right after the return address.\n\n'
+                    'Stack dump (hex):\n'
+                    '0x7fffffffe340: 41 41 41 41 41 41 41 41  41 41 41 41 41 41 41 41\n'
+                    '0x7fffffffe350: 86 11 40 00 00 00 00 00  43 54 46 7b 6f 76 65 72\n'
+                    '0x7fffffffe360: 66 6c 6f 77 5f 6d 65 64  69 75 6d 7d 00 00 00 00\n\n'
+                    'Extract the flag from the hex dump.'
                 ),
                 'hint_1': 'The overflow happens at a 64-byte buffer. Look for a gadget that leads to the print_flag function.',
                 'hint_2': 'In a 64-bit binary, saved RBP plus return address are 16 bytes after the buffer start.',

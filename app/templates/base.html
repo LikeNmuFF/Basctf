@@ -18,17 +18,19 @@
     <span class="navbar-brand-text">CTF_PLATFORM</span>
     <span class="brand-bracket">]</span>
   </a>
-  <div class="nav-links">
-    <a href="{{ url_for('challenges.list_challenges') }}"
-       class="nav-link {% if request.blueprint == 'challenges' %}active{% endif %}">Challenges</a>
-    <a href="{{ url_for('scoreboard.scoreboard') }}"
-       class="nav-link {% if request.blueprint == 'scoreboard' %}active{% endif %}">Scoreboard</a>
-    <a href="{{ url_for('auth.stats') }}"
-       class="nav-link {% if request.endpoint == 'auth.stats' %}active{% endif %}">My Stats</a>
-    {% if current_user.is_admin %}
-    <a href="{{ url_for('admin.dashboard') }}"
-       class="nav-link admin-link {% if request.blueprint == 'admin' %}active{% endif %}">Admin</a>
-    {% endif %}
+    <div class="nav-links">
+        <a href="{{ url_for('challenges.list_challenges') }}"
+           class="nav-link {% if request.blueprint == 'challenges' %}active{% endif %}">Challenges</a>
+        <a href="{{ url_for('scoreboard.scoreboard') }}"
+           class="nav-link {% if request.blueprint == 'scoreboard' %}active{% endif %}">Scoreboard</a>
+        <a href="{{ url_for('activity.activity') }}"
+           class="nav-link {% if request.blueprint == 'activity' %}active{% endif %}">Activity</a>
+        <a href="{{ url_for('auth.stats') }}"
+           class="nav-link {% if request.endpoint == 'auth.stats' %}active{% endif %}">My Stats</a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin.dashboard') }}"
+           class="nav-link admin-link {% if request.blueprint == 'admin' %}active{% endif %}">Admin</a>
+        {% endif %}
     <span class="nav-user">
       {% if not current_user.is_admin %}
         {% set ranking = get_user_ranking(current_user.id) %}
