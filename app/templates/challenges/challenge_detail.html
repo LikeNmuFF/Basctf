@@ -65,7 +65,7 @@
         <h4>Challenge Link</h4>
         <div class="link-container">
           <a href="{{ challenge.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
-            🔗 Open Link
+            Open Link
           </a>
           <span class="link-url">{{ challenge.link }}</span>
         </div>
@@ -79,7 +79,7 @@
         {% set file_ext = filename.split('.')[-1].lower() if '.' in filename else '' %}
         <div class="attachment-file">
           <div class="file-info">
-            <span class="file-icon">📄</span>
+            <span class="file-icon">FILE</span>
             <span class="file-name">{{ filename }}</span>
             <span class="file-type">{{ file_ext.upper() if file_ext else 'FILE' }}</span>
           </div>
@@ -89,7 +89,7 @@
           </a>
           {% endif %}
           <a href="{{ url_for('static', filename=challenge.file_path) }}" class="btn btn-sm btn-secondary" download="{{ filename }}">
-            ⬇ Download File
+            Download File
           </a>
         </div>
       </div>
@@ -98,7 +98,7 @@
 
     {% if already_solved %}
     <div class="solved-notice">
-      ✓ &nbsp; You have already solved this challenge and earned {{ challenge.points }} points.
+      &#10003; &nbsp; You have already solved this challenge and earned {{ challenge.points }} points.
     </div>
     {% else %}
     <div class="flag-form">
@@ -131,126 +131,135 @@
      {% endif %}
    </div>
  </div>
- 
- {% block extra_js %}
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-      const challengeId = {{ challenge.id }};
-      const likeBtn = document.getElementById('like-btn');
-      const dislikeBtn = document.getElementById('dislike-btn');
-      const ratingPercentageCompact = document.getElementById('rating-percentage-compact');
-      const ratingFeedback = document.getElementById('rating-feedback');
-      
-      // Initialize rating display
-      function initRating() {
-          fetch(`/challenges/${challengeId}/rating`)
-              .then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      ratingPercentageCompact.textContent = data.stats.like_percentage + '%';
-                      updateButtonStates(data.user_rating);
-                  }
-              })
-              .catch(err => {
-                  console.error('Failed to load rating:', err);
-                  ratingPercentageCompact.textContent = '0%';
-              });
-      }
-      
-      // Update button states based on user's current rating
-      function updateButtonStates(userRating) {
-          // Remove active states first
-          likeBtn.classList.remove('active', 'btn-outline-secondary');
-          likeBtn.classList.add('btn-outline-secondary');
-          dislikeBtn.classList.remove('active', 'btn-outline-secondary');
-          dislikeBtn.classList.add('btn-outline-secondary');
-          
-          // Set active state based on user rating
-          if (userRating === true) {
-              likeBtn.classList.remove('btn-outline-secondary');
-              likeBtn.classList.add('active', 'btn-primary');
-          } else if (userRating === false) {
-              dislikeBtn.classList.remove('btn-outline-secondary');
-              dislikeBtn.classList.add('active', 'btn-primary');
-          }
-          // If userRating is null/undefined, both buttons remain in outline state
-      }
-      
-      // Handle like button click
-      likeBtn.addEventListener('click', function() {
-          submitRating('like');
-      });
-      
-      // Handle dislike button click
-      dislikeBtn.addEventListener('click', function() {
-          submitRating('dislike');
-      });
-      
-      // Submit rating via AJAX
-      function submitRating(ratingType) {
-          // Disable buttons during request
-          likeBtn.disabled = true;
-          dislikeBtn.disabled = true;
-          
-          fetch(`/challenges/${challengeId}/rate`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRFToken': document.querySelector('[name=csrf_token]').value
-              },
-              body: JSON.stringify({ rating: ratingType })
-          })
-          .then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  // Update percentage display
-                  ratingPercentageCompact.textContent = data.stats.like_percentage + '%';
-                  
-                  // Update button states
-                  updateButtonStates(data.user_rating);
-                  
-                  // Show feedback
-                  ratingFeedback.textContent = data.message;
-                  ratingFeedback.className = 'rating-feedback mt-2 alert alert-success';
-                  
-                  // Hide feedback after 3 seconds
-                  setTimeout(() => {
-                      ratingFeedback.textContent = '';
-                      ratingFeedback.className = 'rating-feedback mt-2';
-                  }, 3000);
-              } else {
-                  // Show error
-                  ratingFeedback.textContent = data.error || 'Failed to submit rating';
-                  ratingFeedback.className = 'rating-feedback mt-2 alert alert-danger';
-                  
-                  // Hide feedback after 3 seconds
-                  setTimeout(() => {
-                      ratingFeedback.textContent = '';
-                      ratingFeedback.className = 'rating-feedback mt-2';
-                  }, 3000);
-              }
-          })
-          .catch(err => {
-              console.error('Error submitting rating:', err);
-              ratingFeedback.textContent = 'Network error. Please try again.';
-              ratingFeedback.className = 'rating-feedback mt-2 alert alert-danger';
-              
-              // Hide feedback after 3 seconds
-              setTimeout(() => {
-                  ratingFeedback.textContent = '';
-                  ratingFeedback.className = 'rating-feedback mt-2';
-              }, 3000);
-          })
-          .finally(() => {
-              // Re-enable buttons
-              likeBtn.disabled = false;
-              dislikeBtn.disabled = false;
-          });
-      }
-      
-      // Initialize on page load
-      initRating();
-  });
-  </script>
- {% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const challengeId = {{ challenge.id }};
+    const likeBtn = document.getElementById('like-btn');
+    const dislikeBtn = document.getElementById('dislike-btn');
+    const ratingPercentageCompact = document.getElementById('rating-percentage-compact');
+    const ratingFeedback = document.getElementById('rating-feedback');
+    
+    // Track pending requests to prevent double submission
+    let pendingRequest = false;
+    
+    // Initialize rating display
+    function initRating() {
+        fetch(`/challenges/${challengeId}/rating`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    ratingPercentageCompact.textContent = data.stats.like_percentage + '%';
+                    updateButtonStates(data.user_rating);
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load rating:', err);
+                ratingPercentageCompact.textContent = '0%';
+            });
+    }
+    
+    // Update button states based on user's current rating
+    function updateButtonStates(userRating) {
+        // Remove active states first
+        likeBtn.classList.remove('active', 'btn-outline-secondary');
+        likeBtn.classList.add('btn-outline-secondary');
+        dislikeBtn.classList.remove('active', 'btn-outline-secondary');
+        dislikeBtn.classList.add('btn-outline-secondary');
+        
+        // Set active state based on user rating
+        if (userRating === true) {
+            likeBtn.classList.remove('btn-outline-secondary');
+            likeBtn.classList.add('active', 'btn-primary');
+        } else if (userRating === false) {
+            dislikeBtn.classList.remove('btn-outline-secondary');
+            dislikeBtn.classList.add('active', 'btn-primary');
+        }
+        // If userRating is null/undefined, both buttons remain in outline state
+    }
+    
+    // Handle like button click
+    likeBtn.addEventListener('click', function() {
+        // Prevent double-click
+        if (pendingRequest) return;
+        submitRating('like');
+    });
+    
+    // Handle dislike button click
+    dislikeBtn.addEventListener('click', function() {
+        // Prevent double-click
+        if (pendingRequest) return;
+        submitRating('dislike');
+    });
+    
+    // Submit rating via AJAX
+    function submitRating(ratingType) {
+        // Disable buttons and set flag during request
+        likeBtn.disabled = true;
+        dislikeBtn.disabled = true;
+        pendingRequest = true;
+        
+        fetch(`/challenges/${challengeId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrf_token]').value
+            },
+            body: JSON.stringify({ rating: ratingType })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update percentage display
+                ratingPercentageCompact.textContent = data.stats.like_percentage + '%';
+                
+                // Update button states
+                updateButtonStates(data.user_rating);
+                
+                // Show feedback
+                ratingFeedback.textContent = data.message;
+                ratingFeedback.className = 'rating-feedback mt-2 alert alert-success';
+                
+                // Hide feedback after 3 seconds
+                setTimeout(() => {
+                    ratingFeedback.textContent = '';
+                    ratingFeedback.className = 'rating-feedback mt-2';
+                }, 3000);
+            } else {
+                // Show error
+                ratingFeedback.textContent = data.error || 'Failed to submit rating';
+                ratingFeedback.className = 'rating-feedback mt-2 alert alert-danger';
+                
+                // Hide feedback after 3 seconds
+                setTimeout(() => {
+                    ratingFeedback.textContent = '';
+                    ratingFeedback.className = 'rating-feedback mt-2';
+                }, 3000);
+            }
+        })
+        .catch(err => {
+            console.error('Error submitting rating:', err);
+            ratingFeedback.textContent = 'Network error. Please try again.';
+            ratingFeedback.className = 'rating-feedback mt-2 alert alert-danger';
+            
+            // Hide feedback after 3 seconds
+            setTimeout(() => {
+                ratingFeedback.textContent = '';
+                ratingFeedback.className = 'rating-feedback mt-2';
+            }, 3000);
+        })
+        .finally(() => {
+            // Re-enable buttons and clear pending flag
+            likeBtn.disabled = false;
+            dislikeBtn.disabled = false;
+            pendingRequest = false;
+        });
+    }
+    
+    // Initialize on page load
+    initRating();
+});
+</script>
 {% endblock %}

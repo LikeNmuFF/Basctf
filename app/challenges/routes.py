@@ -100,11 +100,12 @@ def challenge_hint(challenge_id, hint_number):
 @challenges_bp.route('/<int:challenge_id>/rate', methods=['POST'])
 @login_required
 def rate_challenge_route(challenge_id):
-    from ..services import rate_challenge, get_challenge_rating_stats, get_user_challenge_rating, remove_challenge_rating
+    from .services import rate_challenge, get_challenge_rating_stats, get_user_challenge_rating, remove_challenge_rating
+    from ..models import Challenge
     from flask import jsonify
     
-    challenge = get_challenge_by_id(challenge_id)
-    if not challenge.is_active:
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge or not challenge.is_active:
         return jsonify({'error': 'Challenge not available'}), 404
     
     data = request.get_json()
@@ -140,11 +141,12 @@ def rate_challenge_route(challenge_id):
 @challenges_bp.route('/<int:challenge_id>/rating', methods=['GET'])
 @login_required
 def get_challenge_rating(challenge_id):
-    from ..services import get_challenge_rating_stats, get_user_challenge_rating
+    from .services import get_challenge_rating_stats, get_user_challenge_rating
+    from ..models import Challenge
     from flask import jsonify
     
-    challenge = get_challenge_by_id(challenge_id)
-    if not challenge.is_active:
+    challenge = Challenge.query.get(challenge_id)
+    if not challenge or not challenge.is_active:
         return jsonify({'error': 'Challenge not available'}), 404
     
     stats = get_challenge_rating_stats(challenge_id)
